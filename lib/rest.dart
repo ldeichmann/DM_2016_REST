@@ -1,6 +1,7 @@
 import 'package:start/start.dart';
 import 'package:dm_rest/types/titel.dart';
 import 'package:dm_rest/types/kuenstler.dart';
+import 'dart:convert';
 
 void main() {
 
@@ -24,9 +25,18 @@ void main() {
     });
 
     app.get('/kuenstler').listen((request) {
+      var mapData = new Map();
+
+      mapData["id"] = kuenstlerList.last.id;
+      mapData["name"] = kuenstlerList.last.name;
+      mapData["biographie"] = kuenstlerList.last.biographie;
+      mapData["herkunft"] = kuenstlerList.last.herkunft;
+
+      String jsonData = JSON.encode(mapData);
+
       request.response
           .header('Content-Type', 'text/html; charset=UTF-8')
-          .send(kuenstlerList.toString());
+          .send(jsonData);
     });
 
     app.get('/kuenstler/:id').listen((request) {
