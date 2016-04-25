@@ -13,20 +13,24 @@ main() {
 
     app.get('/album').listen((request) {
       try {
+
         String jsonData = JSON.encode(album.albumList);
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
+        
       } catch (e, st) {
+
         print(st);
         request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
       }
 
     });
 
     app.post('/album').listen((request) async {
-
       try {
+
         HttpRequest hr = request.input;
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
@@ -43,18 +47,21 @@ main() {
           var name = m["name"];
           var laenge = m["laenge"];
           var kuenstler = m["kuenstler"];
-          var id = new_album.nextTitelID();
-          var new_titel = new titel(id, name, laenge, kuenstler);
+          var tid = new_album.nextTitelID();
+          var new_titel = new titel(tid, name, laenge, kuenstler);
           new_album.addTitel(new_titel);
         }
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.OK).send("");
+            .status(HttpStatus.OK).send(id);
+
       } catch (e, st) {
+
         print(e);
         print(st);
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
       }
     });
 
@@ -86,13 +93,14 @@ main() {
 
     app.put('/album/:id').listen((request) async {
       try {
+
         HttpRequest hr = request.input;
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
 
         album al = album.findAlbum(request.param('id'));
         if (al == null) {
-          throw("does not exist");
+          throw("Not found");
         }
 
         al.name = jsonData["name"];
@@ -111,13 +119,18 @@ main() {
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
-      } catch (e, st) {
-        print(e);
-        print(st);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
-      }
 
+      } catch (e, st) {
+
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+
+      }
     });
 
     app.delete('/album/:id').listen((request) {
@@ -129,40 +142,56 @@ main() {
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
+
       } catch (e, st) {
-        print(e);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+
       }
     });
 
     app.get('/album/:id/titel').listen((request) {
       try {
+
         album al = album.findAlbum(request.param('id'));
         if (al == null) {
-          throw("does not exist");
+          throw("Not found");
         }
 
         var jsonData = JSON.encode(al.titelList);
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send(jsonData);
+
       } catch (e, st) {
-        print(e);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+
       }
     });
 
     app.post('/album/:id/titel').listen((request) async {
       try {
+
         HttpRequest hr = request.input;
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
 
         album al = album.findAlbum(request.param('id'));
         if (al == null) {
-          throw("does not exist");
+          throw("Not found");
         }
 
         var name = jsonData["name"];
@@ -174,15 +203,23 @@ main() {
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send(jsonData);
+
       } catch (e, st) {
-        print(e);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+
       }
     });
 
     app.get('/album/:id/titel/:tid').listen((request) {
       try {
+
         album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("Not found");
@@ -198,7 +235,9 @@ main() {
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
+
       } catch (e, st) {
+
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
@@ -206,12 +245,14 @@ main() {
           print(st);
           request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
         }
+
       }
 
     });
 
     app.put('/album/:id/titel/:tid').listen((request) async {
       try {
+
         HttpRequest hr = request.input;
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
@@ -233,7 +274,9 @@ main() {
       request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send("");
+
       } catch (e, st) {
+
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
@@ -241,11 +284,13 @@ main() {
           print(st);
           request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
         }
+
       }
     });
 
     app.delete('/album/:id/titel/:tid').listen((request) {
       try {
+
         album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("Not found");
@@ -258,7 +303,9 @@ main() {
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send();
+
       } catch (e, st) {
+
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
@@ -266,26 +313,31 @@ main() {
           print(st);
           request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
         }
+
       }
     });
 
     app.get('/kuenstler').listen((request) {
-
       try {
+
         String jsonData = JSON.encode(kuenstler.kuenstlerList);
 
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
+
       } catch (e, st) {
+
+        print(e);
         print(st);
         request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
       }
     });
 
     app.post('/kuenstler').listen((request) async {
-
       try {
+
         HttpRequest hr = request.input;
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
@@ -300,10 +352,14 @@ main() {
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
-      } catch (e) {
+
+      } catch (e, st) {
+
         print(e);
+        print(st);
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
       }
     });
 
@@ -320,7 +376,9 @@ main() {
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
+
       } catch (e, st) {
+
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
@@ -328,11 +386,13 @@ main() {
           print(st);
           request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
         }
+
       }
     });
 
     app.put('/kuenstler/:id').listen((request) async {
       try {
+
         HttpRequest hr = request.input;
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
@@ -348,10 +408,17 @@ main() {
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
-      } catch (e) {
-        print(e);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
+      } catch (e, st) {
+
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+
       }
     });
 
@@ -364,10 +431,17 @@ main() {
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
-      } catch (e) {
-        print(e);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+
+      } catch (e, st) {
+
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+
       }
     });
 
