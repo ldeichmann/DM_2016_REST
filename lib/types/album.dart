@@ -71,7 +71,7 @@ class album {
   bool deleteTitel(String searchID) {
     titel t = findTitel(searchID);
     if (t != null) {
-      return albumList.remove(t);
+      return titelList.remove(t);
     }
     return false;
   }
