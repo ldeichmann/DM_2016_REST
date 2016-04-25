@@ -85,20 +85,126 @@ main() {
       }
     });
 
-    app.put('/album/:id').listen((request) {
+    app.put('/album/:id').listen((request) async {
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
+
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("does not exist");
+        }
+
+        al.name = jsonData["name"];
+        al.k = jsonData["kuenstler"];
+        al.preis = jsonData["preis"];
+
+        al.titelList.clear();
+
+        for (Map m in jsonData["titel"]) {
+          var name = m["name"];
+          var laenge = m["laenge"];
+          var kuenstler = m["kuenstler"];
+          var new_titel = new titel("t" + al.titelList.length.toString(), name, laenge, kuenstler);
+          al.addTitel(new_titel);
+        }
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send("");
+      } catch (e, st) {
+        print(e);
+        print(st);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
 
     });
 
     app.delete('/album/:id').listen((request) {
+      try {
 
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("does not exist");
+        }
+
+        albumList.remove(al);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send("");
+      } catch (e, st) {
+        print(e);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
     });
 
     app.get('/album/:id/titel').listen((request) {
+      try {
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("does not exist");
+        }
 
+        var jsonData = JSON.encode(al.titelList);
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send(jsonData);
+      } catch (e, st) {
+        print(e);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
     });
 
-    app.post('/album/:id/titel').listen((request) {
+    app.post('/album/:id/titel').listen((request) async {
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
 
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("does not exist");
+        }
+
+        var name = jsonData["name"];
+        var laenge = jsonData["laenge"];
+        var kuenstler = jsonData["kuenstler"];
+        var new_titel = new titel("t" + al.titelList.length.toString(), name, laenge, kuenstler);
+        al.addTitel(new_titel);
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send(jsonData);
+      } catch (e, st) {
+        print(e);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
     });
 
     app.get('/album/:id/titel/:tid').listen((request) {
@@ -141,12 +247,94 @@ main() {
 
     });
 
-    app.put('/album/:id/titel/:tid').listen((request) {
+    app.put('/album/:id/titel/:tid').listen((request) async {
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
 
+
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("Not found");
+        }
+        titel tl;
+        for (titel t in al.titelList) {
+          if (t.id.toString() == request.param('tid')) {
+            tl = t;
+            break;
+          }
+        }
+        if (tl == null) {
+          throw("Not found");
+        }
+
+        tl.name = jsonData["name"];
+        tl.laenge = jsonData["laenge"];
+        tl.kuenstler_id = jsonData["kuenstler"];
+
+      request.response
+            .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
+            .send(jsonData);
+      } catch (e, st) {
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+      }
     });
 
-    app.delete('/album/:id/titel/:tid').listen((request) {
+    app.delete('/album/:id/titel/:tid').listen((request) async {
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
 
+
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("Not found");
+        }
+        titel tl;
+        for (titel t in al.titelList) {
+          if (t.id.toString() == request.param('tid')) {
+            tl = t;
+            break;
+          }
+        }
+        if (tl == null) {
+          throw("Not found");
+        }
+
+        al.removeTitel(tl);
+
+        request.response
+            .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
+            .send(jsonData);
+      } catch (e, st) {
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+      }
     });
 
     app.get('/kuenstler').listen((request) {
@@ -221,12 +409,60 @@ main() {
       }
     });
 
-    app.put('/kuenstler/:id').listen((request) {
+    app.put('/kuenstler/:id').listen((request) async {
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
 
+        kuenstler ku;
+        for (kuenstler k in kuenstlerList) {
+          if (k.id.toString() == request.param('id')) {
+            ku = k;
+            break;
+          }
+        }
+        if (ku == null) {
+          throw("Not found");
+        }
+
+
+        ku.name = jsonData["name"];
+        ku.biographie = jsonData["biographie"];
+        ku.herkunft = jsonData["herkunft"];
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send("");
+      } catch (e) {
+        print(e);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
     });
 
     app.delete('/kuenstler/:id').listen((request) {
+      try {
 
+        kuenstler ku;
+        for (kuenstler k in kuenstlerList) {
+          if (k.id.toString() == request.param('id')) {
+            ku = k;
+            break;
+          }
+        }
+        if (ku == null) {
+          throw("Not found");
+        }
+
+        kuenstlerList.remove(ku);
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send("");
+      } catch (e) {
+        print(e);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
     });
 
   });
