@@ -13,7 +13,7 @@ class kuenstler {
   }
 
   String toString() {
-    return this.id.toString() + " " + this.name + " " + this.biographie + " " + this.herkunft;
+    return "id: " + this.id.toString() + " name: " + this.name + " bio: " + this.biographie + " herkunft: " + this.herkunft;
   }
 
 }
