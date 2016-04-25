@@ -2,6 +2,7 @@ import 'package:start/start.dart';
 import 'package:dm_rest/types/titel.dart';
 import 'package:dm_rest/types/kuenstler.dart';
 import 'dart:convert';
+import 'dart:async';
 
 void main() {
 
@@ -25,12 +26,21 @@ void main() {
     });
 
     app.get('/kuenstler').listen((request) {
+
       var mapData = new Map();
 
-      mapData["id"] = kuenstlerList.last.id;
-      mapData["name"] = kuenstlerList.last.name;
-      mapData["biographie"] = kuenstlerList.last.biographie;
-      mapData["herkunft"] = kuenstlerList.last.herkunft;
+
+      int i = 0;
+      for (kuenstler k in kuenstlerList) {
+        var kuenstlerData = new Map();
+        kuenstlerData["id"] = k.id;
+        kuenstlerData["name"] = k.name;
+        kuenstlerData["biographie"] = k.biographie;
+        kuenstlerData["herkunft"] = k.herkunft;
+        mapData[i] = kuenstlerData;
+        i++;
+      }
+      print(mapData);
 
       String jsonData = JSON.encode(mapData);
 
@@ -44,11 +54,20 @@ void main() {
     });
 
     app.post('/kuenstler').listen((request) {
+
+      try {
+        var pl = request.payload();
+        pl.then((content) => print(JSON.decode(content)));
+      } catch (e) {
+        print(e);
+      }
+
       var name = request.param('name');
       var biographie = request.param('biographie');
       var herkunft = request.param('herkunft');
       var new_kuenstler = new kuenstler(kuenstlerList.length, name, biographie, herkunft);
-      kuenstlerList.add(new_kuenstler);
+ //     kuenstlerList.add(new_kuenstler);
+      print(new_kuenstler);
     });
 
   });

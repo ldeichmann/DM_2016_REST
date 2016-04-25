@@ -12,4 +12,8 @@ class kuenstler {
     this.herkunft = herkunft;
   }
 
+  String toString() {
+    return this.id.toString() + " " + this.name + " " + this.biographie + " " + this.herkunft;
+  }
+
 }
