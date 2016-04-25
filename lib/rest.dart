@@ -202,7 +202,7 @@ main() {
         al.addTitel(new_titel);
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.OK).send(jsonData);
+            .status(HttpStatus.OK).send("");
 
       } catch (e, st) {
 
@@ -302,7 +302,7 @@ main() {
 
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
-            .send();
+            .send("");
 
       } catch (e, st) {
 
