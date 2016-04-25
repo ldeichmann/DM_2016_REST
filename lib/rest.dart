@@ -56,8 +56,6 @@ main() {
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
       }
-
-
     });
 
     app.get('/album/:id').listen((request) {
@@ -72,9 +70,7 @@ main() {
         if (al == null) {
           throw("Not found");
         }
-
         String jsonData = JSON.encode(al);
-
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
@@ -87,10 +83,25 @@ main() {
           request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
         }
       }
+    });
+
+    app.put('/album/:id').listen((request) {
 
     });
 
-    app.get('/album/:id/:tid').listen((request) {
+    app.delete('/album/:id').listen((request) {
+
+    });
+
+    app.get('/album/:id/titel').listen((request) {
+
+    });
+
+    app.post('/album/:id/titel').listen((request) {
+
+    });
+
+    app.get('/album/:id/titel/:tid').listen((request) {
       try {
         album al;
         for (album a in albumList) {
@@ -108,6 +119,9 @@ main() {
             tl = t;
             break;
           }
+        }
+        if (tl == null) {
+          throw("Not found");
         }
 
         String jsonData = JSON.encode(tl);
@@ -127,6 +141,13 @@ main() {
 
     });
 
+    app.put('/album/:id/titel/:tid').listen((request) {
+
+    });
+
+    app.delete('/album/:id/titel/:tid').listen((request) {
+
+    });
 
     app.get('/kuenstler').listen((request) {
 
@@ -139,6 +160,34 @@ main() {
       } catch (e, st) {
         print(st);
         request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
+    });
+
+    app.post('/kuenstler').listen((request) async {
+
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
+
+        var name = jsonData["name"];
+        var biographie = jsonData["biographie"];
+        var herkunft = jsonData["herkunft"];
+        var id;
+        if (kuenstlerList.length == 0) {
+          id = "k0";
+        } else {
+          id = "k" + ((int.parse(kuenstlerList.last.id.substring(1))) + 1).toString();
+        }
+        var new_kuenstler = new kuenstler(id, name, biographie, herkunft);
+        kuenstlerList.add(new_kuenstler);
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send("");
+      } catch (e) {
+        print(e);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
       }
     });
 
@@ -172,26 +221,12 @@ main() {
       }
     });
 
-    app.post('/kuenstler').listen((request) async {
+    app.put('/kuenstler/:id').listen((request) {
 
-      try {
-        HttpRequest hr = request.input;
-        var jsonString = await hr.transform(UTF8.decoder).join();
-        Map jsonData = JSON.decode(jsonString);
+    });
 
-        var name = jsonData["name"];
-        var biographie = jsonData["biographie"];
-        var herkunft = jsonData["herkunft"];
-        var new_kuenstler = new kuenstler("k" + kuenstlerList.length.toString(), name, biographie, herkunft);
-        kuenstlerList.add(new_kuenstler);
+    app.delete('/kuenstler/:id').listen((request) {
 
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.OK).send("");
-      } catch (e) {
-        print(e);
-        request.response.header('Content-Type', 'text/html; charset=UTF-8')
-            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
-      }
     });
 
   });

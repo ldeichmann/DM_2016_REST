@@ -1,6 +1,6 @@
 class kuenstler {
 
-  var id;
+  String id;
   var name;
   var biographie;
   var herkunft;
