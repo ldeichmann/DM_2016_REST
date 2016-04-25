@@ -27,7 +27,6 @@ main() {
         print(st);
         request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
       }
-
     });
 
     app.get('/kuenstler/:id').listen((request) {
