@@ -2,9 +2,10 @@ import 'package:start/start.dart';
 import 'package:dm_rest/types/titel.dart';
 import 'package:dm_rest/types/kuenstler.dart';
 import 'dart:convert';
+import 'dart:io' show HttpRequest;
 import 'dart:async';
 
-void main() {
+main() {
 
   List<kuenstler> kuenstlerList = new List();
   List<titel> titelList = new List();
@@ -14,7 +15,7 @@ void main() {
 
     app.static('web');
 
-    app.get('/hello/:name.:lastname?').listen((request) {
+    app.get('/hello/:name.:lastname?').listen((request) async {
       request.response
           .header('Content-Type', 'text/html; charset=UTF-8')
           .send('Hello, ${request.param('name')} ${request.param('lastname')}');
@@ -53,21 +54,29 @@ void main() {
 
     });
 
-    app.post('/kuenstler').listen((request) {
+    app.post('/kuenstler').listen((request) async {
 
       try {
-        var pl = request.payload();
-        pl.then((content) => print(JSON.decode(content)));
+        HttpRequest hr = request.input;
+
+        print(hr.headers);
+
+        var jsonString = await hr.transform(UTF8.decoder).join();
+
+        print(jsonString);
+
+        var name = request.param('name');
+        var biographie = request.param('biographie');
+        var herkunft = request.param('herkunft');
+        var new_kuenstler = new kuenstler(
+            kuenstlerList.length, name, biographie, herkunft);
+        //     kuenstlerList.add(new_kuenstler);
+        print(new_kuenstler);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .send('Hello');
       } catch (e) {
         print(e);
       }
-
-      var name = request.param('name');
-      var biographie = request.param('biographie');
-      var herkunft = request.param('herkunft');
-      var new_kuenstler = new kuenstler(kuenstlerList.length, name, biographie, herkunft);
- //     kuenstlerList.add(new_kuenstler);
-      print(new_kuenstler);
     });
 
   });
