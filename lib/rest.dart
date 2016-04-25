@@ -18,7 +18,7 @@ main() {
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
-        
+
       } catch (e, st) {
 
         print(st);
@@ -80,7 +80,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -122,7 +122,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -145,7 +145,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -171,7 +171,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -206,7 +206,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -238,7 +238,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -277,7 +277,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -306,7 +306,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -379,7 +379,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -411,7 +411,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
@@ -434,7 +434,7 @@ main() {
 
       } catch (e, st) {
 
-        if (e == "Not Found") {
+        if (e == "Not found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
           print(e);
