@@ -7,16 +7,13 @@ import 'package:dm_rest/types/album.dart';
 
 main() {
 
-  List<kuenstler> kuenstlerList = new List();
-  List<album> albumList = new List();
-
   start(port: 3000).then((Server app) {
 
     app.static('web');
 
     app.get('/album').listen((request) {
       try {
-        String jsonData = JSON.encode(albumList);
+        String jsonData = JSON.encode(album.albumList);
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
@@ -37,14 +34,17 @@ main() {
         var name = jsonData["name"];
         var kuenstler = jsonData["kuenstler"];
         var preis = jsonData["preis"];
-        var new_album = new album("a" + albumList.length.toString(), name, kuenstler, preis);
-        albumList.add(new_album);
+        var id = album.nextAlbumID();
+
+        var new_album = new album(id, name, kuenstler, preis);
+        album.addAlbum(new_album);
 
         for (Map m in jsonData["titel"]) {
           var name = m["name"];
           var laenge = m["laenge"];
           var kuenstler = m["kuenstler"];
-          var new_titel = new titel("t" + new_album.titelList.length.toString(), name, laenge, kuenstler);
+          var id = new_album.nextTitelID();
+          var new_titel = new titel(id, name, laenge, kuenstler);
           new_album.addTitel(new_titel);
         }
 
@@ -60,21 +60,19 @@ main() {
 
     app.get('/album/:id').listen((request) {
       try {
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("Not found");
         }
+
         String jsonData = JSON.encode(al);
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
             .send(jsonData);
+
       } catch (e, st) {
+
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
         } else {
@@ -82,6 +80,7 @@ main() {
           print(st);
           request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
         }
+
       }
     });
 
@@ -91,19 +90,13 @@ main() {
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
 
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("does not exist");
         }
 
         al.name = jsonData["name"];
-        al.k = jsonData["kuenstler"];
+        al.kuenstler_id = jsonData["kuenstler"];
         al.preis = jsonData["preis"];
 
         al.titelList.clear();
@@ -112,7 +105,7 @@ main() {
           var name = m["name"];
           var laenge = m["laenge"];
           var kuenstler = m["kuenstler"];
-          var new_titel = new titel("t" + al.titelList.length.toString(), name, laenge, kuenstler);
+          var new_titel = new titel(al.nextTitelID(), name, laenge, kuenstler);
           al.addTitel(new_titel);
         }
 
@@ -130,18 +123,10 @@ main() {
     app.delete('/album/:id').listen((request) {
       try {
 
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
-        if (al == null) {
-          throw("does not exist");
+        if (!album.deleteAlbum(request.param('id'))) {
+          throw("Not found");
         }
 
-        albumList.remove(al);
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
       } catch (e, st) {
@@ -153,13 +138,7 @@ main() {
 
     app.get('/album/:id/titel').listen((request) {
       try {
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("does not exist");
         }
@@ -181,13 +160,7 @@ main() {
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
 
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("does not exist");
         }
@@ -195,7 +168,8 @@ main() {
         var name = jsonData["name"];
         var laenge = jsonData["laenge"];
         var kuenstler = jsonData["kuenstler"];
-        var new_titel = new titel("t" + al.titelList.length.toString(), name, laenge, kuenstler);
+        var id = al.nextTitelID();
+        var new_titel = new titel(id, name, laenge, kuenstler);
         al.addTitel(new_titel);
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
@@ -209,23 +183,12 @@ main() {
 
     app.get('/album/:id/titel/:tid').listen((request) {
       try {
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("Not found");
         }
-        titel tl;
-        for (titel t in al.titelList) {
-          if (t.id.toString() == request.param('tid')) {
-            tl = t;
-            break;
-          }
-        }
+
+        titel tl = al.findTitel(request.param('tid'));
         if (tl == null) {
           throw("Not found");
         }
@@ -253,24 +216,12 @@ main() {
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
 
-
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("Not found");
         }
-        titel tl;
-        for (titel t in al.titelList) {
-          if (t.id.toString() == request.param('tid')) {
-            tl = t;
-            break;
-          }
-        }
+
+        titel tl = al.findTitel(request.param('tid'));
         if (tl == null) {
           throw("Not found");
         }
@@ -281,7 +232,7 @@ main() {
 
       request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
-            .send(jsonData);
+            .send("");
       } catch (e, st) {
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
@@ -293,39 +244,20 @@ main() {
       }
     });
 
-    app.delete('/album/:id/titel/:tid').listen((request) async {
+    app.delete('/album/:id/titel/:tid').listen((request) {
       try {
-        HttpRequest hr = request.input;
-        var jsonString = await hr.transform(UTF8.decoder).join();
-        Map jsonData = JSON.decode(jsonString);
-
-
-        album al;
-        for (album a in albumList) {
-          if (a.id.toString() == request.param('id')) {
-            al = a;
-            break;
-          }
-        }
+        album al = album.findAlbum(request.param('id'));
         if (al == null) {
           throw("Not found");
         }
-        titel tl;
-        for (titel t in al.titelList) {
-          if (t.id.toString() == request.param('tid')) {
-            tl = t;
-            break;
-          }
-        }
-        if (tl == null) {
+
+        if (!al.deleteTitel(request.param('tid'))) {
           throw("Not found");
         }
 
-        al.removeTitel(tl);
-
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
-            .send(jsonData);
+            .send();
       } catch (e, st) {
         if (e == "Not Found") {
           request.response.status(HttpStatus.NOT_FOUND).send("");
@@ -340,7 +272,7 @@ main() {
     app.get('/kuenstler').listen((request) {
 
       try {
-        String jsonData = JSON.encode(kuenstlerList);
+        String jsonData = JSON.encode(kuenstler.kuenstlerList);
 
         request.response
             .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
@@ -361,14 +293,10 @@ main() {
         var name = jsonData["name"];
         var biographie = jsonData["biographie"];
         var herkunft = jsonData["herkunft"];
-        var id;
-        if (kuenstlerList.length == 0) {
-          id = "k0";
-        } else {
-          id = "k" + ((int.parse(kuenstlerList.last.id.substring(1))) + 1).toString();
-        }
+        var id = kuenstler.nextKuenstlerID();
+
         var new_kuenstler = new kuenstler(id, name, biographie, herkunft);
-        kuenstlerList.add(new_kuenstler);
+        kuenstler.addKuenstler(new_kuenstler);
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
@@ -382,13 +310,7 @@ main() {
     app.get('/kuenstler/:id').listen((request) {
       try {
 
-        kuenstler ku;
-        for (kuenstler k in kuenstlerList) {
-          if (k.id.toString() == request.param('id')) {
-            ku = k;
-            break;
-          }
-        }
+        kuenstler ku = kuenstler.findKuenstler(request.param('id'));
         if (ku == null) {
           throw("Not found");
         }
@@ -415,17 +337,10 @@ main() {
         var jsonString = await hr.transform(UTF8.decoder).join();
         Map jsonData = JSON.decode(jsonString);
 
-        kuenstler ku;
-        for (kuenstler k in kuenstlerList) {
-          if (k.id.toString() == request.param('id')) {
-            ku = k;
-            break;
-          }
-        }
+        kuenstler ku = kuenstler.findKuenstler(request.param('id'));
         if (ku == null) {
           throw("Not found");
         }
-
 
         ku.name = jsonData["name"];
         ku.biographie = jsonData["biographie"];
@@ -443,18 +358,9 @@ main() {
     app.delete('/kuenstler/:id').listen((request) {
       try {
 
-        kuenstler ku;
-        for (kuenstler k in kuenstlerList) {
-          if (k.id.toString() == request.param('id')) {
-            ku = k;
-            break;
-          }
-        }
-        if (ku == null) {
+        if (!kuenstler.deleteKuenstler(request.param('id'))) {
           throw("Not found");
         }
-
-        kuenstlerList.remove(ku);
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
