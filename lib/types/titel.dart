@@ -2,18 +2,23 @@ class titel {
 
   var id;
   var name;
-  var preis;
-  var pfad;
-  var laenge;
+  int laenge;
   var kuenstler_id;
 
-  titel(id, name, preis, pfad, laenge, kuenstler_id) {
+  titel(id, name, laenge, kuenstler_id) {
     this.id = id;
     this.name = name;
-    this.preis = preis;
-    this.pfad = pfad;
     this.laenge = laenge;
     this.kuenstler_id = kuenstler_id;
+  }
+
+  Map toJson() {
+    Map map = new Map();
+    map["id"] = this.id;
+    map["name"] = this.name;
+    map["laenge"] = this.laenge;
+    map["kuenstler_id"] = this.kuenstler_id;
+    return map;
   }
 
 }

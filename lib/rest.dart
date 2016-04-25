@@ -3,17 +3,130 @@ import 'package:dm_rest/types/titel.dart';
 import 'package:dm_rest/types/kuenstler.dart';
 import 'dart:convert';
 import 'dart:io' show HttpRequest, HttpStatus;
-import 'dart:async';
+import 'package:dm_rest/types/album.dart';
 
 main() {
 
   List<kuenstler> kuenstlerList = new List();
-  List<titel> titelList = new List();
-
+  List<album> albumList = new List();
 
   start(port: 3000).then((Server app) {
 
     app.static('web');
+
+    app.get('/album').listen((request) {
+      try {
+        String jsonData = JSON.encode(albumList);
+        request.response
+            .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
+            .send(jsonData);
+      } catch (e, st) {
+        print(st);
+        request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
+
+    });
+
+    app.post('/album').listen((request) async {
+
+      try {
+        HttpRequest hr = request.input;
+        var jsonString = await hr.transform(UTF8.decoder).join();
+        Map jsonData = JSON.decode(jsonString);
+
+        var name = jsonData["name"];
+        var kuenstler = jsonData["kuenstler"];
+        var preis = jsonData["preis"];
+        var new_album = new album("a" + albumList.length.toString(), name, kuenstler, preis);
+        albumList.add(new_album);
+
+        for (Map m in jsonData["titel"]) {
+          var name = m["name"];
+          var laenge = m["laenge"];
+          var kuenstler = m["kuenstler"];
+          var new_titel = new titel("t" + new_album.titelList.length.toString(), name, laenge, kuenstler);
+          new_album.addTitel(new_titel);
+        }
+
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.OK).send("");
+      } catch (e, st) {
+        print(e);
+        print(st);
+        request.response.header('Content-Type', 'text/html; charset=UTF-8')
+            .status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+      }
+
+
+    });
+
+    app.get('/album/:id').listen((request) {
+      try {
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("Not found");
+        }
+
+        String jsonData = JSON.encode(al);
+
+        request.response
+            .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
+            .send(jsonData);
+      } catch (e, st) {
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+      }
+
+    });
+
+    app.get('/album/:id/:tid').listen((request) {
+      try {
+        album al;
+        for (album a in albumList) {
+          if (a.id.toString() == request.param('id')) {
+            al = a;
+            break;
+          }
+        }
+        if (al == null) {
+          throw("Not found");
+        }
+        titel tl;
+        for (titel t in al.titelList) {
+          if (t.id.toString() == request.param('tid')) {
+            tl = t;
+            break;
+          }
+        }
+
+        String jsonData = JSON.encode(tl);
+
+        request.response
+            .header('Content-Type', 'text/html; charset=UTF-8').status(HttpStatus.OK)
+            .send(jsonData);
+      } catch (e, st) {
+        if (e == "Not Found") {
+          request.response.status(HttpStatus.NOT_FOUND).send("");
+        } else {
+          print(e);
+          print(st);
+          request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
+        }
+      }
+
+    });
+
 
     app.get('/kuenstler').listen((request) {
 
@@ -27,7 +140,6 @@ main() {
         print(st);
         request.response.status(HttpStatus.INTERNAL_SERVER_ERROR).send("");
       }
-
     });
 
     app.get('/kuenstler/:id').listen((request) {
@@ -70,10 +182,8 @@ main() {
         var name = jsonData["name"];
         var biographie = jsonData["biographie"];
         var herkunft = jsonData["herkunft"];
-        var new_kuenstler = new kuenstler(
-            kuenstlerList.length, name, biographie, herkunft);
+        var new_kuenstler = new kuenstler("k" + kuenstlerList.length.toString(), name, biographie, herkunft);
         kuenstlerList.add(new_kuenstler);
-        print(new_kuenstler);
 
         request.response.header('Content-Type', 'text/html; charset=UTF-8')
             .status(HttpStatus.OK).send("");
